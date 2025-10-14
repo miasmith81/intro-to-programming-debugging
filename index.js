@@ -24,59 +24,62 @@ function getRandomNumber(min, max) { // BUG 1 - was missing a closing parenthesi
 
 // `checkGuess` is called when the user clicks the "Submit Guess" button (checks the user's guess against the target number)
 function checkGuess() {
-  // Get value from guess input element
+  // Step 1: Get and validate guess
   const guess = parseInt(guessInput.value, 10); // Parse the user's guess as an integer (base 10) from the input field value 
   if (isNaN(guess) || guess < 1 || guess > 99) { // BUG 2 - didn't check if the guess was smaller than 1 or greater than 99  
     alert('Please enter a valid number between 1 and 99');
     return; // Exit the function early if the input is invalid 
   }
   
-  // Step 1: Increment attempts at the start of the guess check
+  // Step 2: Increment attempts
   attempts++;
+  console.log('Current attempts:', attempts); // Debug line to verify increment
 
   hideAllMessages(); // `hideAllMessages` hides all the messages so we can show only the relevant one(s)
   
-  // Step 2: Check if the user has run out of attempts FIRST
-  if (attempts >= maxNumberOfAttempts && guess !== targetNumber) {
-    // Step 3: Handle game over - no more attempts
-    maxGuessesMessage.innerHTML = `Game Over! You've used all 5 attempts. The correct number was ${targetNumber}`;
-    maxGuessesMessage.style.display = ''; // Show the game over message  
-    // Hide all other messages (they're already hidden by hideAllMessages above)
-    // Disable both submitButton and guessInput
-    submitButton.disabled = true;
-    guessInput.disabled = true;
-    guessInput.value = ''; // Clear the input field
-    resetButton.style.display = ''; // show the reset button
-    return; // Exit the function
-  }
-
-  // Check if the guess is correct, too high, or too low and show the appropriate message to the user below the input field and buttons (see HTML file for the messages) 
+  // Step 3: Check if correct
   if (guess === targetNumber) {
-    // Handle correct guess case
+    // Handle win
     const guessWord = attempts === 1 ? 'guess' : 'guesses'; // use singular 'guess' if only one attempt, otherwise use plural 'guesses'
     numberOfGuessesMessage.innerHTML = `You made ${attempts} ${guessWord}`; // show the number of attempts the user made to guess the number
     numberOfGuessesMessage.style.display = ''; // show the number of guesses message
     correctMessage.style.display = ''; // show the correct message
     submitButton.disabled = true; // disable the submit button so user can't keep guessing after they already guessed correctly  
-    guessInput.disabled = true; // disable the input field so user can't keep guessing after they already guessed correctly  
+    guessInput.disabled = true; // disable the input field so user can't keep guessing after they already guessed correctly
+    resetButton.style.display = ''; // show the reset button
+    return;
+  }
+  
+  // Step 4: Incorrect guess - show feedback FIRST
+  // Calculate remaining attempts
+  const remainingAttempts = maxNumberOfAttempts - attempts;
+  console.log('Remaining attempts:', remainingAttempts); // Debug line
+  const attemptWord = remainingAttempts === 1 ? 'attempt' : 'attempts'; // singular vs plural
+  
+  // Display: "You guessed X. Y attempts remaining" 
+  numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} ${attemptWord} remaining`;
+  numberOfGuessesMessage.style.display = ''; // show the number of guesses message
+  
+  // Display too high/low message
+  if (guess < targetNumber) {
+    tooLowMessage.style.display = ''; // show the too low message if the guess is less than the target number  
   } else {
-    // Handle incorrect guess case
-    if (guess < targetNumber) {
-      tooLowMessage.style.display = ''; // show the too low message if the guess is less than the target number  
-    } else {
-      tooHighMessage.style.display = ''; // show the too high message if the guess is greater than the target number
-    }
-
-    // Step 4: Fix the remaining attempts calculation and Step 6: Add singular/plural handling
-    const remainingAttempts = maxNumberOfAttempts - attempts; // calculate the number of remaining attempts the user has left  
-    const attemptWord = remainingAttempts === 1 ? 'attempt' : 'attempts'; // singular vs plural
-    numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} ${attemptWord} remaining`; // show the current guess and remaining attempts
-    numberOfGuessesMessage.style.display = ''; // show the number of guesses message  
+    tooHighMessage.style.display = ''; // show the too high message if the guess is greater than the target number
   }
 
-  guessInput.value = ''; // Clear the input field for the next guess 
+  // Step 5: Check if game over (after showing feedback)
+  if (attempts >= maxNumberOfAttempts) {
+    // Disable inputs
+    submitButton.disabled = true;
+    guessInput.disabled = true;
+    // Add game over message
+    maxGuessesMessage.innerHTML = `Game Over! You've used all 5 attempts. The correct number was ${targetNumber}`;
+    maxGuessesMessage.style.display = ''; // Show the game over message
+  }
 
-  resetButton.style.display = ''; // show the reset button so user can start a new game after they guessed correctly or reached max number of attempts 
+  // Step 6: Clear input and show reset button
+  guessInput.value = ''; // Clear the input field for the next guess 
+  resetButton.style.display = ''; // show the reset button so user can start a new game
 }
 
  // Hides all the messages by setting their display style to 'none' 
@@ -94,6 +97,7 @@ function setup() {
 
   // Reset number of attempts
   attempts = 0; // BUG 6 - this should be attempts = 0 not maxNumberOfAttempts = 0 because maxNumberOfAttempts is const and already set to 5 at the top line 13
+  console.log('Game reset, attempts:', attempts); // Debug
 
   // Enable the input and submit button
   submitButton.disabled = false; // BUG 7 - disabled is misspelled was disabeld should be disabled
