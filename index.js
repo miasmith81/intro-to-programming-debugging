@@ -1,113 +1,204 @@
-const guessInput = document.getElementById('guess'); // The input field where the user enters their guess 
-const submitButton = document.getElementById('submit'); // The button the user clicks to submit their guess
-const resetButton = document.getElementById('reset'); // The button the user clicks to reset the game
-const messages = document.getElementsByClassName('message'); // All the message elements that can be shown to the user
-const tooHighMessage = document.getElementById('too-high'); // The message that tells the user their guess was too high 
-const tooLowMessage = document.getElementById('too-low'); // The message that tells the user their guess was too low
-const maxGuessesMessage = document.getElementById('max-guesses'); // The message that tells the user they have reached the maximum number of guesses
-const numberOfGuessesMessage = document.getElementById('number-of-guesses'); // The message that tells the user how many guesses they have made and how many they have left
-const correctMessage = document.getElementById('correct'); // The message that tells the user they guessed correctly
+/**
+ * Number Guessing Game - JavaScript Logic Debugging Exercise
+ * 
+ * Players have 5 attempts to guess a random number between 1 and 99
+ * 
+ * Instructions:
+ * 1. Open the HTML file in a web browser.
+ * 2. Use the input field to enter your guess and click "Submit".
+ * 3. The game will provide feedback on whether your guess is too high, too low, or correct.
+ * 4. You have a maximum of 5 attempts to guess the number correctly.
+ * 5. Click "Reset" to start a new game.
+ * 
+ * Note: This code has been refactored and debugged for clarity and functionality.
+ *    Comments have been added to explain each part of the code.
+ *    Enjoy the game!
+ *    Happy Coding! :)
+ *    - Mia Smith 2024 
+ */
+// ========================================
+// DOM ELEMENT REFERENCES
+// ========================================
+// These constants store references to HTML elements that we'll interact with
 
-let targetNumber; // The number the user is trying to guess
-let attempts = 0; // The number of attempts the user has made
-const maxNumberOfAttempts = 5; // The maximum number of attempts allowed
+const guessInput = document.getElementById('guess');  // Input field where user types their guess
+const submitButton = document.getElementById('submit');  // Button to submit the guess
+const resetButton = document.getElementById('reset');  // Button to restart the game
+const messages = document.getElementsByClassName('message');  // Collection of all message elements
+const tooHighMessage = document.getElementById('too-high');  // Message displayed when guess is too high
+const tooLowMessage = document.getElementById('too-low');  // Message displayed when guess is too low
+const maxGuessesMessage = document.getElementById('max-guesses');  // Message displayed when out of guesses
+const numberOfGuessesMessage = document.getElementById('number-of-guesses');  // Message showing guess count
+const correctMessage = document.getElementById('correct');  // Message displayed when guess is correct
 
-// Returns a random number from min (inclusive) to max (exclusive)
-// Usage:
-// > getRandomNumber(1, 50)
-// <- 32
-// > getRandomNumber(1, 50)
-// <- 11
-function getRandomNumber(min, max) { // BUG 1 - was missing a closing parenthesis
-  return Math.floor(Math.random() * (max - min)) + min;
+// ========================================
+// GAME STATE VARIABLES
+// ========================================
+
+let targetNumber;  // The random number the player needs to guess
+let attempts = 0;  // Counter for how many guesses have been made
+const maxNumberOfAttempts = 5;  // Maximum number of guesses allowed (constant, never changes)
+
+// ========================================
+// UTILITY FUNCTIONS
+// ========================================
+
+/**
+ * Returns a random integer from min (inclusive) to max (exclusive)
+ * 
+ * @param {number} min - The minimum value (inclusive)
+ * @param {number} max - The maximum value (exclusive)
+ * @returns {number} A random integer between min and max-1
+ * 
+ * Example:
+ *   getRandomNumber(1, 50) -> might return 32
+ *   getRandomNumber(1, 50) -> might return 11
+ */
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min; // Generate and return the random number between min and max-1 
 }
 
-// `checkGuess` is called when the user clicks the "Submit Guess" button (checks the user's guess against the target number)
+/**
+ * Hides all message elements by setting their display style to 'none'
+ * This is used to clear all previous messages before showing new ones
+ */
+function hideAllMessages() {
+  // BUG FIX #1: Changed <= to < to prevent accessing an element beyond array bounds
+  // The original code used <=, which would try to access messages[messages.length]
+  // This would cause an error because array indices go from 0 to length-1
+  for (let elementIndex = 0; elementIndex < messages.length; elementIndex++) {
+    messages[elementIndex].style.display = 'none';
+  }
+}
+
+// ========================================
+// GAME LOGIC FUNCTIONS
+// ========================================
+
+/**
+ * Checks the player's guess against the target number
+ * Provides feedback and updates the game state accordingly
+ * This function is called when the submit button is clicked
+ */
 function checkGuess() {
-  // Step 1: Get and validate guess
-  const guess = parseInt(guessInput.value, 10); // Parse the user's guess as an integer (base 10) from the input field value 
-  if (isNaN(guess) || guess < 1 || guess > 99) { // BUG 2 - didn't check if the guess was smaller than 1 or greater than 99  
+  // Get the numeric value from the input field
+  const guess = parseInt(guessInput.value, 10);
+
+  // Validate the input to ensure it's within the allowed range
+  // Stretch Goal: Added isNaN check to handle non-numeric inputs (extra I put in along with the Stretch Goal)
+  // You should not be able to submit a guessed number lower than 1
+  // You should not be able to submit a guessed number higher than 99
+  if (isNaN(guess) || guess < 1 || guess > 99) {
     alert('Please enter a valid number between 1 and 99');
-    return; // Exit the function early if the input is invalid 
+    return; // Exit the function if input is invalid
   }
   
-  // Step 2: Increment attempts
-  attempts++;
-  console.log('Current attempts:', attempts); // Debug line to verify increment
+  // Increment the attempts counter
+  attempts = attempts + 1;
 
-  hideAllMessages(); // `hideAllMessages` hides all the messages so we can show only the relevant one(s)
-  
-  // Step 3: Check if correct
-  if (guess === targetNumber) {
-    // Handle win
-    const guessWord = attempts === 1 ? 'guess' : 'guesses'; // use singular 'guess' if only one attempt, otherwise use plural 'guesses'
-    numberOfGuessesMessage.innerHTML = `You made ${attempts} ${guessWord}`; // show the number of attempts the user made to guess the number
-    numberOfGuessesMessage.style.display = ''; // show the number of guesses message
-    correctMessage.style.display = ''; // show the correct message
-    submitButton.disabled = true; // disable the submit button so user can't keep guessing after they already guessed correctly  
-    guessInput.disabled = true; // disable the input field so user can't keep guessing after they already guessed correctly
-    resetButton.style.display = ''; // show the reset button
-    return;
-  }
-  
-  // Step 4: Incorrect guess - show feedback FIRST
-  // Calculate remaining attempts
+  // Clear any previous messages before showing new ones
+  hideAllMessages();
+
+  // // Calculate remaining attempts for display purposes for pluralization logic 
   const remainingAttempts = maxNumberOfAttempts - attempts;
-  console.log('Remaining attempts:', remainingAttempts); // Debug line
-  const attemptWord = remainingAttempts === 1 ? 'attempt' : 'attempts'; // singular vs plural
-  
-  // Display: "You guessed X. Y attempts remaining" 
-  numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} ${attemptWord} remaining`;
-  numberOfGuessesMessage.style.display = ''; // show the number of guesses message
-  
-  // Display too high/low message
-  if (guess < targetNumber) {
-    tooLowMessage.style.display = ''; // show the too low message if the guess is less than the target number  
-  } else {
-    tooHighMessage.style.display = ''; // show the too high message if the guess is greater than the target number
-  }
 
-  // Step 5: Check if game over (after showing feedback)
-  if (attempts >= maxNumberOfAttempts) {
-    // Disable inputs
+  // Check if the guess is correct
+  if (guess === targetNumber) {
+    // Display the number of guesses made
+    numberOfGuessesMessage.style.display = '';
+    numberOfGuessesMessage.innerHTML = `You made ${attempts} guesses`;
+
+    // Display the success message
+    correctMessage.style.display = '';
+
+    // Disable further guessing since the game is won
     submitButton.disabled = true;
     guessInput.disabled = true;
-    // Add game over message
-    maxGuessesMessage.innerHTML = `Game Over! You've used all 5 attempts. The correct number was ${targetNumber}`;
-    maxGuessesMessage.style.display = ''; // Show the game over message
   }
 
-  // Step 6: Clear input and show reset button
-  guessInput.value = ''; // Clear the input field for the next guess 
-  resetButton.style.display = ''; // show the reset button so user can start a new game
-}
-
- // Hides all the messages by setting their display style to 'none' 
-function hideAllMessages() {
-  for (let elementIndex = 0; elementIndex < messages.length; elementIndex++) { // BUG 4 - the loop was going one too far and causing an error because it was trying to access an index that doesn't exist in the messages array (change <= to <)
-    messages[elementIndex].style.display = 'none'; // hide each message element 
+  // If the guess is incorrect, provide feedback
+  if (guess !== targetNumber) {
+    // BUG FIX #2: Changed the else block to show tooHighMessage instead of tooLowMessage
+    // The original code showed tooLowMessage for both cases, which was incorrect
+    if (guess < targetNumber) {
+      tooLowMessage.style.display = '';  // Show "too low" message
+    } else {
+      tooHighMessage.style.display = '';  // Show "too high" message (FIXED)
+    }
+    // Display the number of guesses made and remaining attempts 
+    numberOfGuessesMessage.style.display = '';
+    numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} guesses remaining`;
   }
+
+  // BUG FIX #3: Changed ==== to === for proper equality comparison
+  // JavaScript doesn't have a ==== operator; the correct strict equality operator is ===
+  // Check if all attempts have been used
+  if (attempts === maxNumberOfAttempts) {
+    // BUG FIX #4: Added display of maxGuessesMessage when out of guesses
+    // The original code disabled inputs but never showed the "max guesses" message
+    maxGuessesMessage.style.display = '';
+    
+    // Disable further guessing since all attempts are used
+    submitButton.disabled = true;
+    guessInput.disabled = true;
+  } else {
+    // User still has attempts remaining
+    numberOfGuessesMessage.style.display = '';
+    // Use singular/plural form based on remaining attempts
+    // Stretch Goal: If there is only one guess left, it should say "guess" (singular) instead of "guesses" (plural)
+    const guessText = remainingAttempts === 1 ? 'guess' : 'guesses';
+    numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} ${guessText} remaining`;
+  }
+
+  // Clear the input field for the next guess
+  guessInput.value = '';
+
+  // Show the reset button so the player can start a new game
+  resetButton.style.display = '';
 }
 
-// BUG 5 - function is misspelled
+/**
+ * Sets up a new game by resetting all game state and UI elements
+ * This function is called when the page loads and when the reset button is clicked
+ */
+// BUG FIX #5: Fixed typo - changed "funtion" to "function"
 function setup() {
-  // Get random number
+  // Generate a new random target number between 1 and 99 (inclusive)
   targetNumber = getRandomNumber(1, 100);
-  console.log(`target number: ${targetNumber}`); // Log the target number to the console for debugging purposes  
+  console.log(`target number: ${targetNumber}`);  // Log for debugging purposes
 
-  // Reset number of attempts
-  attempts = 0; // BUG 6 - this should be attempts = 0 not maxNumberOfAttempts = 0 because maxNumberOfAttempts is const and already set to 5 at the top line 13
-  console.log('Game reset, attempts:', attempts); // Debug
+  // BUG FIX #6: Changed assignment to 0 instead of resetting to 0
+  // The original code set maxNumberOfAttempts = 0, which is wrong
+  // We need to reset attempts (the counter), not maxNumberOfAttempts (the constant limit)
+  attempts = 0;  // Reset the attempts counter to 0
 
-  // Enable the input and submit button
-  submitButton.disabled = false; // BUG 7 - disabled is misspelled was disabeld should be disabled
-  guessInput.disabled = false; // Enable the input field so user can start guessing again  
+  // BUG FIX #7: Fixed typo - changed "disabeld" to "disabled"
+  // Enable the input field and submit button for a new game
+  submitButton.disabled = false;
+  guessInput.disabled = false;
 
-  hideAllMessages(); // Hide all messages 
-  resetButton.style.display = 'none'; // Hide the reset button until the user guesses correctly or reaches max number of attempts  
+  // Hide all messages to start with a clean slate
+  hideAllMessages();
+  
+  // Hide the reset button at the start of a new game
+  resetButton.style.display = 'none';
 }
 
-submitButton.addEventListener('click', checkGuess); // When the user clicks the submit button, call the `checkGuess` function to check their guess  
-resetButton.addEventListener('click', setup); // When the user clicks the reset button, call the `setup` function to start a new game 
+// ========================================
+// EVENT LISTENERS
+// ========================================
 
-setup(); // Call the `setup` function to initialize the game when the page loads  
+// Attach the checkGuess function to the submit button's click event
+submitButton.addEventListener('click', checkGuess);
+
+// Attach the setup function to the reset button's click event
+resetButton.addEventListener('click', setup);
+
+// ========================================
+// GAME INITIALIZATION
+// ========================================
+
+// BUG FIX #8: This setup() call initializes the game when the page loads
+// The original code had this, but the setup function had multiple bugs that prevented
+// proper initialization (see bugs #5, #6, #7 above)
+setup();  // Start the game when the page loads
