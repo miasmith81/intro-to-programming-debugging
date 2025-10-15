@@ -148,7 +148,8 @@ function checkGuess() {
     numberOfGuessesMessage.style.display = '';
     // Use singular/plural form based on remaining attempts
     // Stretch Goal: If there is only one guess left, it should say "guess" (singular) instead of "guesses" (plural)
-    const guessText = remainingAttempts === 1 ? 'guess' : 'guesses';
+    // BUG FIX #10: Adjusted pluralization logic to correctly handle 0 too 
+    const guessText = (remainingAttempts === 0 || remainingAttempts === 1) ? 'guess' : 'guesses';
     numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} ${guessText} remaining`;
   }
 
