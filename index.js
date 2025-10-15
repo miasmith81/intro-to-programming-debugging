@@ -99,7 +99,9 @@ function checkGuess() {
   // Clear any previous messages before showing new ones
   hideAllMessages();
 
-  // // Calculate remaining attempts for display purposes for pluralization logic 
+  // Calculate remaining attempts for display purposes for pluralization logic 
+  // BUG FIX #9: Moved this line up to ensure remainingAttempts is calculated before use
+  // The original code calculated remainingAttempts after it was first used, which leads to incorrect display
   const remainingAttempts = maxNumberOfAttempts - attempts;
 
   // Check if the guess is correct
