@@ -14,7 +14,7 @@
  *    Comments have been added to explain each part of the code.
  *    Enjoy the game!
  *    Happy Coding! :)
- *    - Mia Smith 2024 
+ *    - Mia Smith 2025
  */
 // ========================================
 // DOM ELEMENT REFERENCES
