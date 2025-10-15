@@ -14,7 +14,7 @@
  *    Comments have been added to explain each part of the code.
  *    Enjoy the game!
  *    Happy Coding! :)
- *    - Mia Smith 2025
+ *    - Mia Smith 2024 
  */
 // ========================================
 // DOM ELEMENT REFERENCES
@@ -127,9 +127,11 @@ function checkGuess() {
     } else {
       tooHighMessage.style.display = '';  // Show "too high" message (FIXED)
     }
-    // Display the number of guesses made and remaining attempts 
+    // Display the number of guesses made and remaining attempts
+    // BUG FIX: Added pluralization logic for remaining attempts display
+    const guessText = remainingAttempts === 1 ? 'guess' : 'guesses';
     numberOfGuessesMessage.style.display = '';
-    numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} guesses remaining`;
+    numberOfGuessesMessage.innerHTML = `You guessed ${guess}. <br> ${remainingAttempts} ${guessText} remaining`;
   }
 
   // BUG FIX #3: Changed ==== to === for proper equality comparison
